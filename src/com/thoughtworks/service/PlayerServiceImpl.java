@@ -1,6 +1,7 @@
 package com.thoughtworks.service;
 
 import com.thoughtworks.domain.Player;
+import com.thoughtworks.domain.PlayerGrouping;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,7 +70,6 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public void coordinatePlayerKills(final List<Player> players) {
-
         // For each round, certain players will be removed based on administrator constraints.
         final int noOfRoundMax = players.size() - 1;
         for (int eachRound = 1; eachRound <= noOfRoundMax; eachRound++) {
@@ -82,24 +82,29 @@ public class PlayerServiceImpl implements PlayerService {
                 playerActionMap.put(player, randomPlayer);
                 generateLog(player.getPlayerRole(), player, randomPlayer);
             }
-
-            Map<Player, Player> killedMap = new HashMap<>();
-            Map<Player, Player> suspectMap = new HashMap<>();
-
-            for (final Map.Entry<Player, Player> eachPlayer : playerActionMap.entrySet()) {
-                final Player playerHashKey = eachPlayer.getKey();
-                if (playerHashKey.getPlayerRole().equals(KILLER)) {
-                    killedMap.put(playerHashKey, eachPlayer.getValue());
-                } else {
-                    suspectMap.put(playerHashKey, eachPlayer.getValue());
-                }
-
-            }
-            coordinatePlayers(players, killedMap, suspectMap);
-
+            groupPlayersByRole(playerActionMap);
+            coordinatePlayers(players, groupPlayersByRole(playerActionMap));
         }
 
+    }
 
+    private PlayerGrouping groupPlayersByRole(final Map<Player, Player> playerActionMap) {
+        Map<Player, Player> killedMap = new HashMap<>();
+        Map<Player, Player> healerMap = new HashMap<>();
+        Map<Player, Player> suspectMap = new HashMap<>();
+
+        for (final Map.Entry<Player, Player> eachPlayer : playerActionMap.entrySet()) {
+            final Player playerHashKey = eachPlayer.getKey();
+            if (playerHashKey.getPlayerRole().equals(KILLER)) {
+                killedMap.put(playerHashKey, eachPlayer.getValue());
+            } else if (playerHashKey.getPlayerRole().equals(HEALER)) {
+                healerMap.put(playerHashKey, eachPlayer.getValue());
+            } else {
+                suspectMap.put(playerHashKey, eachPlayer.getValue());
+            }
+
+        }
+        return new PlayerGrouping(killedMap, healerMap, suspectMap);
     }
 
     private boolean isOtherPlayersNotAvailable(final List<Player> players) {
@@ -113,9 +118,9 @@ public class PlayerServiceImpl implements PlayerService {
     private Player randomPlayersExcludingOwn(final Player player, final List<Player> players) {
         // Exclude Same ROLE or SAME Player ID
         players.removeIf(c -> c.getPlayerId() == player.getPlayerId());
-        if (KILLER.equals(player.getPlayerRole())) {
-            players.removeIf(c -> c.getPlayerRole().equals(player.getPlayerRole()));
-        }
+//        if (KILLER.equals(player.getPlayerRole())) {
+//            players.removeIf(c -> c.getPlayerRole().equals(player.getPlayerRole()));
+//        }
         return players.get(generateRandom(players.size()));
     }
 }

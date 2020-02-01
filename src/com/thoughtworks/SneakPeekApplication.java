@@ -23,10 +23,10 @@ public class SneakPeekApplication {
 
         log("HOW MANY PLAYERS ARE PARTICIPATING IN THE GAME ?");
         final int noOfPlayers = sc.nextInt();
-//        log("HOW MANY KILLERS ?");
-        final int noOfKillers = 1; // sc.nextInt();
-//        log("HOW MANY HEALERS ?");
-        final int noOfHealers = 0; //sc.nextInt();
+        log("HOW MANY KILLERS ?");
+        final int noOfKillers = sc.nextInt();
+        log("HOW MANY HEALERS ?");
+        final int noOfHealers = sc.nextInt();
 
         final List<Player> players = ps.assignRoles(noOfPlayers, noOfKillers, noOfHealers);
         players.forEach(x ->
@@ -34,8 +34,8 @@ public class SneakPeekApplication {
                         "P" + x.getPlayerId(),
                         x.getPlayerRole().toString())));
 
-        System.out.println("--- Killers starts killing players ---- ");
-        ps.randomlyKillPlayers(players);
+//        System.out.println("--- Killers starts killing players ---- ");
+//        ps.randomlyKillPlayers(players);
 
         System.out.println("--- Administration started the coordination of players ---- ");
         ps.coordinatePlayerKills(players);

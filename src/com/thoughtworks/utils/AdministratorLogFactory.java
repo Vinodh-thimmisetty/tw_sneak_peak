@@ -26,6 +26,11 @@ public class AdministratorLogFactory {
                         "SUSPECTED",
                         "P" + actionOn.getPlayerId()));
                 break;
+            case HEALER:
+                log(String.join(" ", "P" + actionFrom.getPlayerId(),
+                        "HEALED",
+                        "P" + actionOn.getPlayerId()));
+                break;
             default:
                 break;
         }
