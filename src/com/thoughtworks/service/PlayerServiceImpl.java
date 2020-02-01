@@ -69,12 +69,12 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public void coordinatePlayerKills(final List<Player> players) {
+    public void coordinatePlayerKills(List<Player> players) {
         // For each round, certain players will be removed based on administrator constraints.
         final int noOfRoundMax = players.size() - 1;
-        for (int eachRound = 1; eachRound <= noOfRoundMax; eachRound++) {
-            if (isKillerNotAvailable(players) || isOtherPlayersNotAvailable(players)) break;
-            log("Round - " + eachRound);
+        int eachRound = 1;
+        while (!isKillerNotAvailable(players) && !isOtherPlayersNotAvailable(players)) {
+            log("Round - " + eachRound++);
             // Randomly pick any Killer, and randomly kill other players.
             Map<Player, Player> playerActionMap = new HashMap<>();
             for (final Player player : players) {
@@ -83,7 +83,8 @@ public class PlayerServiceImpl implements PlayerService {
                 generateLog(player.getPlayerRole(), player, randomPlayer);
             }
             groupPlayersByRole(playerActionMap);
-            coordinatePlayers(players, groupPlayersByRole(playerActionMap));
+            players.removeAll(coordinatePlayers(players, groupPlayersByRole(playerActionMap)));
+            log("\n");
         }
 
     }

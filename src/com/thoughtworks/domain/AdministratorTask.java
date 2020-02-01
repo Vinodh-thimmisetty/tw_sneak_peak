@@ -16,19 +16,18 @@ public class AdministratorTask {
     // If return TRUE, Game is FINISHED.
     public static List<Player> coordinatePlayers(List<Player> players,
                                                  final PlayerGrouping playerGrouping) {
-
-        if (playerGrouping.getKilledMap().size() == 1 &&
+        List<Player> players_killed = new ArrayList<>();
+/*        if (playerGrouping.getKilledMap().size() == 1 &&
                 playerGrouping.getSuspectMap().size() == 1) {
             for (final Map.Entry<Player, Player> eachKiller : playerGrouping.getKilledMap().entrySet()) {
                 final Player currentKiller = eachKiller.getKey();
                 final Player currentToBeKilled = eachKiller.getValue();
 
-                validateAndRemovePlayers(players,
+                players_killed.addAll(validateAndRemovePlayers(players,
                         "Killer P" + currentKiller.getPlayerId() + " suspected P" + currentToBeKilled.getPlayerId() + " and  Killed",
-                        playerGrouping.getHealerMap(), currentKiller, currentToBeKilled);
+                        playerGrouping.getHealerMap(), currentKiller, currentToBeKilled));
             }
-//            return Collections.emptyList();
-        }
+        }*/
         List<Player> playersToRemove = new ArrayList<>();
         Map<Player, Integer> suspectCountPerPlayer = new HashMap<>();
         for (final Map.Entry<Player, Player> eachSuspectedPlayer : playerGrouping.getSuspectMap().entrySet()) {
@@ -53,36 +52,36 @@ public class AdministratorTask {
         for (final Map.Entry<Player, Player> eachKiller : playerGrouping.getKilledMap().entrySet()) {
             final Player killer = eachKiller.getKey();
             final Player to_be_killed = eachKiller.getValue();
-            validateAndRemovePlayers(players,
+            players_killed.addAll(validateAndRemovePlayers(players,
                     "Killer P" + killer.getPlayerId() + " suspected P" + to_be_killed.getPlayerId() + " and  Killed",
-                    playerGrouping.getHealerMap(), to_be_killed);
+                    playerGrouping.getHealerMap(), to_be_killed));
             if (playersToRemove.contains(killer)) {
                 playersToRemove.remove(killer);
-                validateAndRemovePlayers(players,
+                players_killed.addAll(validateAndRemovePlayers(players,
                         "Killer P" + killer.getPlayerId() + " is Killed",
-                        playerGrouping.getHealerMap(), killer);
+                        playerGrouping.getHealerMap(), killer));
             }
         }
 
         for (final Player player : playersToRemove) {
-            validateAndRemovePlayers(players,
+            players_killed.addAll(validateAndRemovePlayers(players,
                     "More than one Innocents identified wrong killer ---> So, co-ordinator killed P" + player.getPlayerId(),
-                    playerGrouping.getHealerMap(), player);
+                    playerGrouping.getHealerMap(), player));
         }
 
-        return players;
+        return players_killed;
 
     }
 
-    private static void validateAndRemovePlayers(final List<Player> players,
-                                                 final String logMessage,
-                                                 final Map<Player, Player> healerMap,
-                                                 final Player... playersToKill) {
-
+    private static List<Player> validateAndRemovePlayers(final List<Player> players,
+                                                         final String logMessage,
+                                                         final Map<Player, Player> healerMap,
+                                                         final Player... playersToKill) {
+        List<Player> players_to_remove = new ArrayList<>();
 
         if (healerMap.isEmpty()) {
             log(logMessage);
-            players.remove(playersToKill);
+            Collections.addAll(players_to_remove, playersToKill);
         } else {
             // Remove the player only is player is not healed.
             for (final Player player_to_be_killed : playersToKill) {
@@ -91,13 +90,13 @@ public class AdministratorTask {
                         log("P" + player_to_be_killed.getPlayerId() + " is healed by healer P" + healer.getKey().getPlayerId());
                     } else {
                         log(logMessage);
-                        players.remove(player_to_be_killed);
+                        Collections.addAll(players_to_remove, player_to_be_killed);
                     }
                 }
             }
         }
 
-
+        return players_to_remove;
     }
 
 }
